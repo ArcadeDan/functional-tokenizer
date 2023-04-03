@@ -2,13 +2,17 @@ module Main where
 
 import System.IO ( hFlush, stdout )
 
-repl :: IO b
+
+repl :: IO ()
 repl = do
   putStr "λ> "
   hFlush stdout
   input <- getLine
-  putStrLn input
-  repl
+  if input == ":q"
+    then return ()
+    else do
+        putStrLn input
+        repl
 
 
 main :: IO ()
