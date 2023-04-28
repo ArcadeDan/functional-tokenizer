@@ -1,7 +1,7 @@
 module Main where
 
 import System.IO ( hFlush, stdout )
-import Data.Char
+import Data.Char ( isAlpha, isAlphaNum, isDigit, isSpace )
 
 
 data Token
@@ -9,20 +9,39 @@ data Token
     | SUB
     | MUL
     | DIV
+    | MOD
+    | EXP
+    | LBRACKET
+    | RBRACKET
     | LPAREN
     | RPAREN
-    | NUMBER
+    | NUMBER Integer
+    | IDENTIFIER String
+    | KEYWORD String
     deriving (Show, Eq)
 
-tokenize :: [Char] -> [Token]
+keyowrds :: [String]
+keyowrds = ["if", "then", "else", "let", "in", "true", "false"]
+
+
+tokenize :: String -> [Token]
 tokenize [] = []
 tokenize (c:cs)
     | isSpace c = tokenize cs
-    | isDigit c = NUMBER : tokenize (dropWhile isDigit cs)
+    | isDigit c = NUMBER (read num) : tokenize rest
+    | isAlpha c = let (str, rest) = span isAlphaNum (c:cs)
+                  in if str `elem` keyowrds
+                        then KEYWORD str : tokenize rest
+                        else IDENTIFIER str : tokenize rest
+                        
     | c == '+'  = ADD : tokenize cs
     | c == '-'  = SUB : tokenize cs
     | c == '*'  = MUL : tokenize cs
     | c == '/'  = DIV : tokenize cs
+    | c == '%'  = MOD : tokenize cs
+    | c == '^'  = EXP : tokenize cs
+    | c == '['  = LBRACKET : tokenize cs
+    | c == ']'  = RBRACKET : tokenize cs
     | c == '('  = LPAREN : tokenize cs
     | c == ')'  = RPAREN : tokenize cs
     | otherwise = error $ "Cannot tokenize " ++ [c]
